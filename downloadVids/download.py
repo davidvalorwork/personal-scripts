@@ -7,8 +7,8 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 
-print("1. Starting selenium")
 chrome_options = Options()
+chrome_options.add_argument("--mute-audio")
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--window-size=1920x1080")
 driver = webdriver.Chrome( service=Service(ChromeDriverManager().install()), options=chrome_options)
@@ -16,39 +16,31 @@ driver = webdriver.Chrome( service=Service(ChromeDriverManager().install()), opt
 vidsAlreadyDownloaded = os.listdir('vids')
 with open('/home/davidvalorwork/projects/notas/info/other/social/sargin/kat2.md') as f:
     lines = f.readlines()
-    print("Cantidad de videos",len(lines))
-
 for url in lines:
-    print("2. Setting URL's and filename")
+    print(str(lines.index(url))+'/'+str(len(lines)))
     filename = url[url.rfind('/Video/')+15:-2]+'.mp4'
-    print(url, filename)
     condition = filename in vidsAlreadyDownloaded
-    print(condition)
     if(not condition):
-        print("3. Driver getting url")
         driver.get(url)
 
-        print("4. Pressing the play button")
 
         elements = driver.find_elements(by=By.CSS_SELECTOR, value=".rmp-overlay-button")
-        print("Cantidad de elementos con la clase .rmp-overlay-button", len(elements))
         if(len(elements)!= 0):
             try:
                 elements[0].click()
             except Exception as e:
-                print("Elemento no iteraccionable")
                 pass
         time.sleep(2)
 
-        print("5. Finding video url for download")
-        elements = driver.find_elements(by=By.CSS_SELECTOR, value="div#rmpPlayer")
-        print("Elements with selector .rmp-object-fit-contain rmp-video",len(elements))
-        for e in elements:
-            attr = e.get_attribute('data-video-filepath')
-            attr = attr.replace(' ','%20')
-            print("Link del elemento", attr)
-            if(attr.rfind('.mp4') != -1):
-                videoUrl = attr
+        elements = driver.find_elements(by=By.CSS_SELECTOR, value="video[class='rmp-object-fit-contain rmp-video']")
+        #for e in elements:
+        attr = elements[0].get_attribute('src')
+        attr = attr.replace(' ','%20')
+        if(attr.rfind('.mp4') != -1):
+            videoUrl = attr
 
-        print("6. Creating the file")
-        urllib.request.urlretrieve(videoUrl, 'vids/'+filename)
+        if(videoUrl):
+            urllib.request.urlretrieve(videoUrl, 'vids/'+filename)
+        else:
+            print("ERROR DOWNLOADING")
+            raise "Error"
