@@ -13,8 +13,12 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--window-size=1920x1080")
 driver = webdriver.Chrome( service=Service(ChromeDriverManager().install()), options=chrome_options)
 
-vidsAlreadyDownloaded = os.listdir('vids')
-with open('/home/davidvalorwork/projects/notas/info/other/social/sargin/kat2.md') as f:
+if(os.path.isdir('vids')):
+    vidsAlreadyDownloaded = os.listdir('vids')
+else:
+    os.makedirs('vids')
+    vidsAlreadyDownloaded = os.listdir('vids')
+with open('/home/davidvalorwork/projects/notas/info/other/social/sargin/kat4') as f:
     lines = f.readlines()
 for url in lines:
     print(str(lines.index(url))+'/'+str(len(lines)))
